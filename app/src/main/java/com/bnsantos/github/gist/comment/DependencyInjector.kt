@@ -1,6 +1,7 @@
 package com.bnsantos.github.gist.comment
 
 import com.bnsantos.github.gist.comment.api.GistApi
+import com.bnsantos.github.gist.comment.ui.viewmodel.GistViewModel
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.HttpUrl
@@ -39,6 +40,10 @@ object DependencyInjector {
         GsonBuilder()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ") //"2018-05-08T20:20:08Z"
                 .create()
+    }
+
+    val gistViewModel: GistViewModel by lazy {
+        GistViewModel(gistApi)
     }
 
     private val gistApi: GistApi by lazy {

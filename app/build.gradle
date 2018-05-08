@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-def githubUri = "https://api.github.com/gist/"
+def githubUri = "https://api.github.com/gists/"
 
 android {
     compileSdkVersion 27
@@ -29,13 +29,16 @@ android {
 
 ext {
     retrofitVersion = '2.4.0'
+    supportVersion = '27.1.1'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
+    implementation "com.android.support:appcompat-v7:$supportVersion"
+    implementation "com.android.support:cardview-v7:$supportVersion"
+    implementation "com.android.support:recyclerview-v7:$supportVersion"
+    implementation "com.android.support:design:$supportVersion"
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.google.android.gms:play-services-vision:15.0.1'
     implementation "com.squareup.retrofit2:retrofit:${retrofitVersion}"
@@ -43,6 +46,7 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava2:${retrofitVersion}"
     implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'com.facebook.fresco:fresco:1.9.0'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.mockito:mockito-core:2.13.0'
     testImplementation 'org.jetbrains.kotlin:kotlin-stdlib:1.2.40'
