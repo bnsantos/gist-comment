@@ -1,0 +1,27 @@
+{
+  "url": "https://api.github.com/gists/1e708097a82e0f16c215/comments/2583007",
+  "id": 2583007,
+  "user": {
+    "login": "bnsantos",
+    "id": 4581581,
+    "avatar_url": "https://avatars1.githubusercontent.com/u/4581581?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/bnsantos",
+    "html_url": "https://github.com/bnsantos",
+    "followers_url": "https://api.github.com/users/bnsantos/followers",
+    "following_url": "https://api.github.com/users/bnsantos/following{/other_user}",
+    "gists_url": "https://api.github.com/users/bnsantos/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/bnsantos/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/bnsantos/subscriptions",
+    "organizations_url": "https://api.github.com/users/bnsantos/orgs",
+    "repos_url": "https://api.github.com/users/bnsantos/repos",
+    "events_url": "https://api.github.com/users/bnsantos/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/bnsantos/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "author_association": "OWNER",
+  "created_at": "2018-05-08T20:17:44Z",
+  "updated_at": "2018-05-08T20:17:44Z",
+  "body": "Just commenting for the sake of commenting"
+}

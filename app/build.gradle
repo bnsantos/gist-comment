@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+def githubUri = "https://api.github.com/gist/"
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -13,6 +15,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "URI", "\"$githubUri\""
+        buildConfigField "String", "TOKEN", "\"$githubToken\""
     }
     buildTypes {
         release {
@@ -22,6 +27,10 @@ android {
     }
 }
 
+ext {
+    retrofitVersion = '2.4.0'
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
@@ -29,7 +38,16 @@ dependencies {
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     implementation 'com.google.android.gms:play-services-vision:15.0.1'
+    implementation "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+    implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:${retrofitVersion}"
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
     testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.13.0'
+    testImplementation 'org.jetbrains.kotlin:kotlin-stdlib:1.2.40'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.2.30'
+    testImplementation "com.squareup.okhttp3:mockwebserver:3.9.1"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
