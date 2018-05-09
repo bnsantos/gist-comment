@@ -6,11 +6,11 @@ It's a simple app built in Kotlin with this use case in focus:
 1. The user must open the Gist through a QRCode scan.
 2. Only after the Gist’s opening should the user be able to comment on it.
 
-###[Gist](https://gist.github.com/bnsantos/1e708097a82e0f16c215) QR Code
+### [Gist](https://gist.github.com/bnsantos/1e708097a82e0f16c215) QR Code
 
 <img src="qrcodes/qrcode.png" height="360">
 
-###Used libs
+### Used libs
 * [Play Services Vision](https://developers.google.com/vision/android/barcodes-overview) (read QR Codes)
 * [Retrofit](http://square.github.io/retrofit/) (network layer)
 * [rxKotlin](https://github.com/ReactiveX/RxKotlin) (reactive extensions)
