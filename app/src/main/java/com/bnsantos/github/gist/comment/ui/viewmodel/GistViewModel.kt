@@ -10,10 +10,13 @@ import io.reactivex.functions.BiFunction
 class GistViewModel(private val api: GistApi) {
     lateinit var gistId: String
 
+    lateinit var gist: Gist
+
     fun load(): Observable<Data> {
         return api.read(gistId)
-                .zipWith(api.comments(gistId), BiFunction<Gist, List<Comment>, Data> { gist, comments ->
-                    Data.SuccessLoading(gist, comments)
+                .zipWith(api.comments(gistId), BiFunction<Gist, List<Comment>, Data> { g, comments ->
+                    gist = g
+                    Data.SuccessLoading(g, comments)
                 })
                 .onErrorReturn {
                     it.printStackTrace()

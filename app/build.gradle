@@ -27,6 +27,10 @@ android {
     }
 }
 
+androidExtensions {
+    experimental = true
+}
+
 ext {
     retrofitVersion = '2.4.0'
     supportVersion = '27.1.1'

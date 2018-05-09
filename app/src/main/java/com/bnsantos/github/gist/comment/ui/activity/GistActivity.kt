@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
+import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
@@ -26,9 +28,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_gist.*
+import java.util.*
 
 class GistActivity : AppCompatActivity(), CommentListener {
     companion object {
+        private const val EXTRA_GIST = "GistActivity.extra.gist"
+        private const val EXTRA_ADAPTER_ITEMS = "GistActivity.extra.adapter.items"
+        private const val EXTRA_LAYOUT_MANAGER_STATE = "GistActivity.extra.layout.manager.state"
+
         fun getIntent(context: Context, url: String): Intent {
             val intent = Intent(context, GistActivity::class.java)
             intent.data = Uri.parse(url)
@@ -36,7 +43,7 @@ class GistActivity : AppCompatActivity(), CommentListener {
         }
     }
 
-    var disposable: Disposable? = null
+    private var disposable: Disposable? = null
 
     private val viewModel: GistViewModel by lazy { DependencyInjector.gistViewModel }
 
@@ -53,21 +60,31 @@ class GistActivity : AppCompatActivity(), CommentListener {
         val actionBar = supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
 
-        viewModel.gistId = intent.data.lastPathSegment
-
         val layoutManager = LinearLayoutManager(this)
         rv.layoutManager = layoutManager
         rv.adapter = adapter
 
+        if (savedInstanceState != null) {
+            viewModel.gist = savedInstanceState.getParcelable(EXTRA_GIST)
+            viewModel.gistId = viewModel.gist.id
+            updateOwner(viewModel.gist.owner)
+            updateGist(viewModel.gist)
+            adapter.comments.addAll(savedInstanceState.getParcelableArrayList(EXTRA_ADAPTER_ITEMS))
+            adapter.notifyDataSetChanged()
+            layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(EXTRA_LAYOUT_MANAGER_STATE))
+
+        } else {
+            viewModel.gistId = intent.data.lastPathSegment
+            showLoading(true)
+            disposable = viewModel.load()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { updateUI(it) }
+        }
+
         send.setOnClickListener {
             createComment()
         }
-
-        showLoading(true)
-        disposable = viewModel.load()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { updateUI(it) }
     }
 
     private fun updateUI(it: Data) {
@@ -264,5 +281,26 @@ class GistActivity : AppCompatActivity(), CommentListener {
                         }
                     }
                 }
+    }
+
+    /**
+     * Saving state methods
+     */
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        saveState(outState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        saveState(outState)
+    }
+
+    private fun saveState(outState: Bundle?) {
+        outState?.let {
+            it.putParcelable(EXTRA_GIST, viewModel.gist)
+            it.putParcelableArrayList(EXTRA_ADAPTER_ITEMS, adapter.comments as ArrayList<out Parcelable>)
+            it.putParcelable(EXTRA_LAYOUT_MANAGER_STATE, rv.layoutManager.onSaveInstanceState())
+        }
     }
 }

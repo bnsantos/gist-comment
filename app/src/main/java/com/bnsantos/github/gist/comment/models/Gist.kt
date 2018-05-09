@@ -1,8 +1,11 @@
 package com.bnsantos.github.gist.comment.models
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 
+@Parcelize
 data class Gist(
         val id: String,
         @SerializedName("html_url")
@@ -12,5 +15,5 @@ data class Gist(
         @SerializedName("updated_at") val updatedAt: Date,
         val comments: Int,
         val owner: User,
-        val files: Map<String, GistFile>
-)
+        val files: ParcelableHashMap
+) : Parcelable
