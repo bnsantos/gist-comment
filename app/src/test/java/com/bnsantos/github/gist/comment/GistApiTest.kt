@@ -13,6 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import retrofit2.HttpException
+import retrofit2.Response
 import java.io.IOException
 import java.nio.charset.Charset
 
@@ -69,7 +70,7 @@ class GistApiTest {
     }
 
     @Test
-    fun commentsNotFound() {
+    fun readCommentsNotFound() {
         server.enqueue(MockResponse().setResponseCode(404).setBody("{\"message\":\"Not Found\",\"documentation_url\":\"https://developer.github.com/v3/gists/comments/#list-comments-on-a-gist\"}"))
         val observer = TestObserver<List<Comment>>()
         api.comments("gistId").subscribe(observer)
@@ -95,6 +96,18 @@ class GistApiTest {
     }
 
     @Test
+    fun createCommentError() {
+        server.enqueue(MockResponse().setResponseCode(404).setBody("{\"message\":\"Not Found\",\"documentation_url\":\"https://developer.github.com/v3/gists/comments/#create-a-comment\"}"))
+        val observer = TestObserver<Comment>()
+        api.comment("gistId", CommentBody("body")).subscribe(observer)
+
+        observer.await()
+                .assertError({
+                    it is HttpException && it.code() == 404
+                })
+    }
+
+    @Test
     fun editComment() {
         enqueueResponse("edit_comment.json")
         val observer = TestObserver<Comment>()
@@ -109,8 +122,8 @@ class GistApiTest {
     }
 
     @Test
-    fun createEditCommentUnauthorized() {
-        server.enqueue(MockResponse().setResponseCode(404).setBody("{\"message\":\"Not Found\",\"documentation_url\":\"https://developer.github.com/v3/gists/comments/#create-a-comment\"}"))
+    fun editCommentError() {
+        server.enqueue(MockResponse().setResponseCode(404).setBody("{\"message\":\"Not Found\",\"documentation_url\":\"https://developer.github.com/v3/gists/comments/#edit-a-comment\"}"))
         val observer = TestObserver<Comment>()
         api.editComment("gistId", "commentId", CommentBody("body")).subscribe(observer)
 
@@ -118,6 +131,32 @@ class GistApiTest {
                 .assertError({
                     it is HttpException && it.code() == 404
                 })
+    }
+
+    @Test
+    fun deleteComment() {
+        server.enqueue(MockResponse().setResponseCode(204).setBody(""))
+        val observer = TestObserver<Response<Unit>>()
+        api.deleteComment("gistId", "commentId").subscribe(observer)
+
+        observer.await()
+                .assertNoErrors()
+                .assertValue({
+                    it.code() == 204
+                })
+    }
+
+    @Test
+    fun deleteCommentError() {
+        server.enqueue(MockResponse().setResponseCode(404).setBody("{\"message\":\"Not Found\",\"documentation_url\":\"https://developer.github.com/v3/gists/comments/#delete-a-comment\"}"))
+        val observer = TestObserver<Comment>()
+        api.editComment("gistId", "commentId", CommentBody("body")).subscribe(observer)
+
+        observer.await()
+                .assertError({
+                    it is HttpException && it.code() == 404
+                })
+
     }
 
     @Throws(IOException::class)

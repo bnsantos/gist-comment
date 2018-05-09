@@ -7,4 +7,12 @@
     <string name="explanation">Point to a valid gist url QR Code</string>
     <string name="gist_comment">Gist Comment</string>
     <string name="gist">Gist</string>
+    <string name="error_loading_gist">Error while loading gist. Please try again with a valid QR code</string>
+    <string name="error_create_comment">Error while creating comment</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="error_delete_comment">Error while deleting comment</string>
+    <string name="edit_comment_help">Edit the comment</string>
+    <string name="cancel">Cancel</string>
+    <string name="error_edit_comment">Error while editing comment</string>
 </resources>

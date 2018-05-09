@@ -2,6 +2,7 @@ package com.bnsantos.github.gist.comment
 
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
+import org.mockito.Mockito
 import java.io.IOException
 import java.io.InputStreamReader
 import java.lang.reflect.Type
@@ -15,3 +16,10 @@ fun <T> loadFromResource(loader: ClassLoader, gson: Gson, fileName: String, type
     reader.close()
     return data
 }
+
+fun <T> any(): T {
+    Mockito.any<T>()
+    return uninitialized()
+}
+
+private fun <T> uninitialized(): T = null as T

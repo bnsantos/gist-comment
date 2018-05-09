@@ -20,11 +20,14 @@ import com.bnsantos.github.gist.comment.models.User
 import com.bnsantos.github.gist.comment.ui.adapter.CommentAdapter
 import com.bnsantos.github.gist.comment.ui.viewmodel.Data
 import com.bnsantos.github.gist.comment.ui.viewmodel.GistViewModel
+import com.bnsantos.github.gist.comment.ui.widget.CommentBottomSheet
+import com.bnsantos.github.gist.comment.ui.widget.EditCommentDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_gist.*
 
-class GistActivity : AppCompatActivity(), OpenLinkInterface {
+class GistActivity : AppCompatActivity(), CommentListener {
     companion object {
         fun getIntent(context: Context, url: String): Intent {
             val intent = Intent(context, GistActivity::class.java)
@@ -32,6 +35,8 @@ class GistActivity : AppCompatActivity(), OpenLinkInterface {
             return intent
         }
     }
+
+    var disposable: Disposable? = null
 
     private val viewModel: GistViewModel by lazy { DependencyInjector.gistViewModel }
 
@@ -59,7 +64,7 @@ class GistActivity : AppCompatActivity(), OpenLinkInterface {
         }
 
         showLoading(true)
-        viewModel.load()
+        disposable = viewModel.load()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { updateUI(it) }
@@ -67,13 +72,25 @@ class GistActivity : AppCompatActivity(), OpenLinkInterface {
 
     private fun updateUI(it: Data) {
         when (it) {
-            is Data.Success -> {
+            is Data.SuccessLoading -> {
                 updateOwner(it.gist.owner)
                 updateGist(it.gist)
                 updateComments(it.comments)
             }
-            is Data.Error -> {
-                Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show()
+            is Data.SuccessComment -> {
+                adapter.comments.add(it.comment)
+                adapter.notifyItemInserted(adapter.comments.size)
+                rv.smoothScrollToPosition(adapter.comments.size)
+                input.setText("")
+                showCommentLoading(false)
+            }
+            is Data.ErrorLoading -> {
+                Toast.makeText(this, R.string.error_loading_gist, Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            is Data.ErrorComment -> {
+                Toast.makeText(this, R.string.error_create_comment, Toast.LENGTH_SHORT).show()
+                showCommentLoading(false)
             }
         }
         showLoading(false)
@@ -144,6 +161,7 @@ class GistActivity : AppCompatActivity(), OpenLinkInterface {
             files.visibility = View.GONE
             input.visibility = View.GONE
             send.visibility = View.GONE
+            progressComment.visibility = View.GONE
         } else {
             progress.visibility = View.GONE
             avatar.visibility = View.VISIBLE
@@ -155,7 +173,96 @@ class GistActivity : AppCompatActivity(), OpenLinkInterface {
         }
     }
 
+    private fun showCommentLoading(show: Boolean) {
+        if (show) {
+            progressComment.visibility = View.VISIBLE
+            send.visibility = View.GONE
+            input.isEnabled = false
+        } else {
+            progressComment.visibility = View.GONE
+            send.visibility = View.VISIBLE
+            input.isEnabled = true
+        }
+    }
+
     private fun createComment() {
-        Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
+        if (input.text.isNotEmpty()) {
+            showCommentLoading(true)
+            disposable = viewModel.createComment(input.text.toString())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        updateUI(it)
+                    }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        disposable?.let {
+            it.dispose()
+        }
+    }
+
+    override fun onLongClick(pos: Int, comment: Comment): Boolean {
+        val bottomSheet = CommentBottomSheet()
+        bottomSheet.listener = object : CommentBottomSheet.Listener {
+            override fun edit() {
+                showEditCommentDialog(pos, comment)
+            }
+
+            override fun delete() {
+                deleteComment(pos, comment)
+            }
+        }
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+        return true
+    }
+
+    private fun deleteComment(pos: Int, comment: Comment) {
+        adapter.notifyItemRemoved(pos)
+        adapter.comments.removeAt(pos)
+        disposable = viewModel.deleteComment(comment.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    when (it) {
+                        is Data.ErrorDeleteComment -> {
+                            Toast.makeText(this, R.string.error_delete_comment, Toast.LENGTH_SHORT).show()
+                            adapter.comments.add(pos, comment)
+                            adapter.notifyItemInserted(pos)
+                        }
+                    }
+                    updateUI(it)
+                }
+    }
+
+    private fun showEditCommentDialog(pos: Int, comment: Comment) {
+        val dialog = EditCommentDialog()
+        dialog.previous = comment.body
+        dialog.listener = object : EditCommentDialog.Listener {
+            override fun edit(newBody: String) {
+                editComment(pos, comment, newBody)
+            }
+        }
+        dialog.show(supportFragmentManager, dialog.tag)
+    }
+
+    private fun editComment(pos: Int, p: Comment, newBody: String) {
+        adapter.replace(pos, Comment(p.id, p.user, p.createdAt, p.updatedAt, newBody))
+        disposable = viewModel.editComment(p.id, newBody)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    when (it) {
+                        is Data.SuccessComment -> {
+                            adapter.replace(pos, it.comment)
+                        }
+                        is Data.ErrorComment -> {
+                            adapter.replace(pos, p)
+                            Toast.makeText(this@GistActivity, R.string.error_edit_comment, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
     }
 }

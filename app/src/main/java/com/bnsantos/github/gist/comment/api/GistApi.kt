@@ -20,5 +20,5 @@ interface GistApi {
     fun editComment(@Path("gist") gist: String, @Path("comment") comment: String, @Body body: CommentBody): Observable<Comment>
 
     @DELETE("{gist}/comments/{comment}")
-    fun deleteComment(@Path("gist") gist: String, @Path("comment") comment: String): Observable<Response<Void>>
+    fun deleteComment(@Path("gist") gist: String, @Path("comment") comment: String): Observable<Response<Unit>>
 }
