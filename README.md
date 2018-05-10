@@ -6,6 +6,13 @@ It's a simple app built in Kotlin with this use case in focus:
 1. The user must open the Gist through a QRCode scan.
 2. Only after the Gist’s opening should the user be able to comment on it.
 
+### How to run
+Add the [Github Personal Token](https://blog.github.com/2013-05-16-personal-api-tokens/) into `gradle.properties`
+
+```properties
+githubToken=<github personal token>
+```
+
 ### [Gist](https://gist.github.com/bnsantos/1e708097a82e0f16c215) QR Code
 
 <img src="qrcodes/qrcode.png" height="360">
